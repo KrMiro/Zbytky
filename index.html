@@ -194,10 +194,10 @@
   
 
   <script>
-    if (performance.navigation.type === performance.navigation.TYPE_RELOAD || performance.getEntriesByType("navigation")[0].type === "reload") {
-      // už reloadnuto
-    } else {
-      // vynucený tvrdý reload (simulace Ctrl+F5)
+    // Reload jednou (např. při první návštěvě nebo aktualizaci)
+    if (!sessionStorage.getItem("reloaded")) {
+      sessionStorage.setItem("reloaded", "true");
+  
       const url = new URL(window.location.href);
       url.searchParams.set('_nocache', Date.now());
       window.location.replace(url);
