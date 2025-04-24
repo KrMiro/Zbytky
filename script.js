@@ -9,9 +9,24 @@ let pouzitIndex = null;
 
 
 
-window.onload = function () {
-  zobrazZbytky();
+window.onload = async function () {
+  const url = "https://raw.githubusercontent.com/krmiro/zbytky/main/zbytky.json";
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // Ulož do localStorage, pokud chceš (nebo používej rovnou bez toho)
+    localStorage.setItem("zbytky", JSON.stringify(data));
+
+    zobrazZbytky();
+    zobrazPoctyNaMape?.();
+  } catch (err) {
+    console.error("❌ Nepodařilo se načíst data z GitHubu:", err);
+    zobrazZbytky(); // fallback na localStorage pokud načtení selže
+  }
 };
+
 
 form.addEventListener("submit", function (e) {
   e.preventDefault();
