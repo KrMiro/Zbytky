@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Evidence zbytků plechu</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#007bff">
+  
+</head>
+<body>
+  <h1>Evidence zbytků plechu</h1>
+
+  <nav>
+    <button onclick="zobrazSekci('evidence')">📋 Evidence</button>
+    <button onclick="zobrazSekci('mapa')">🗺️ Mapa haly</button>
+
+    <button onclick="zobrazSekci('prehled')">📊 Přehled</button>
+    <button onclick="exportDoCSV()">📤 Export EXCEL</button>
+    <button onclick="exportDoPDF()">📄 Export PDF</button>
+
+
+  </nav>
+
+  <div id="evidence" class="sekce">
+    <form id="zbytek-form">
+      <input type="number" id="delka" placeholder="Délka (mm)" required>
+      <input type="number" id="sirka" placeholder="Šířka (mm)" required>
+      <input type="number" id="tloustka" step="0.1" placeholder="Tloušťka (mm)"required>
+      <select id="material" required>
+        <option value="">-- Vyber materiál --</option>
+        <option value="ALMG3 H111">ALMG3 H111</option>
+        <option value="ALMG4.5">ALMG4.5</option>
+        <option value="DC01">DC01</option>
+        <option value="S355MC">S355MC</option>
+        <option value="S235">S235</option>
+        <option value="AISI">AISI</option>
+        <option value="ALMG3 H24">ALMG3 H24</option>
+        <option value="ALMG3 H22">ALMG3 H22</option>
+        <option value="ZINKOR">ZINKOR</option>
+      </select>
+      <input type="number" id="pocet" placeholder="Počet kusů" value="1" min="1" required>
+      <select id="lokalita" required>
+        <option value="">-- Vyber lokaci --</option>
+        <option value="Regál">Regál</option>
+        <option value="U vysekávačky">U vysekávačky</option>
+        <option value="Vysekávačka stojan">Vysekávačka stojan</option>
+        <option value="Laser">Laser</option>
+        <option value="Průjezd">Průjezd</option>
+      </select>
+      
+      <input type="text" id="poznamka" placeholder="Poznámka">
+      <button type="submit">Přidat zbytek</button>
+    </form>
+
+    
+
+    <input type="text" id="vyhledavani" placeholder="Vyhledat..." oninput="zobrazZbytky()">
+
+    
+    
+
+    <ul id="seznam-zbytku"></ul>
+    <div id="pocitadlo-zbytku" class="pocitadlo"></div>
+
+  </div>
+
+  <div id="prehled" class="sekce" style="display:none;">
+    <h2>Přehled skladu</h2>
+    <div id="panel-prehledu"></div>
+  </div>
+
+  <div id="mapa" class="sekce" style="display:none;">
+    <h2>Mapa skladu</h2>
+    <div class="mapa">
+      <img src="img/mapa.png" alt="Mapa haly">
+      
+      <!-- Klikací oblasti -->
+      <div class="zona" style="left: 18%; top: 50%; width: 10%; height: 10%;" onclick="zobrazZbytkyZLokace('Průjezd')" title="Průjezd">
+        <div id="Průjezd" class="bublina">0</div>
+      </div>
+      <div class="zona" style="left: 64%; top: 47%; width: 7%; height: 8%;" onclick="zobrazZbytkyZLokace('Laser')" title="Laser">
+        <div id="Laser" class="bublina">0</div>
+      </div>
+      <div class="zona" style="left: 41%; top: 20%; width: 8%; height: 8%;" onclick="zobrazZbytkyZLokace('U vysekávačky')" title="U vysekávačky">
+        <div id="U vysekávačky" class="bublina">0</div>
+      </div>
+      <div class="zona" style="left: 35%; top: 30%; width: 5%; height: 5%;" onclick="zobrazZbytkyZLokace('Regál')" title="Regál">
+        <div id="Regál" class="bublina">0</div>
+      </div>
+    </div>
+  </div>
+  
+
+  <div id="zbytek-preview" class="zbytek-preview" style="display:none;">
+    <img id="zbytek-img" src="" alt="Nákres zbytku">
+    <button onclick="zavritNahlad()">❌ Zavřít náhled</button>
+  </div>
+
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <h3>Úprava zbytku</h3>
+      Délka<input type="number" id="edit-delka" placeholder="Délka"><br>
+      Šířka<input type="number" id="edit-sirka" placeholder="Šířka"><br>
+      Tloušťka<input type="number" id="edit-tloustka" step="0.1" placeholder="Tloušťka"><br>
+      materiál<select id="edit-material"><br>
+        <option value="">-- Vyber materiál --</option>
+        <option value="ALMG3 H111">ALMG3 H111</option>
+        <option value="ALMG4.5">ALMG4.5</option>
+        <option value="DC01">DC01</option>
+        <option value="S355MC">S355MC</option>
+        <option value="S235">S235</option>
+        <option value="AISI">AISI</option>
+        <option value="ALMG3 H24">ALMG3 H24</option>
+        <option value="ALMG3 H22">ALMG3 H22</option>
+        <option value="ZINKOR">ZINKOR</option>
+        </select>
+      Počet kusů<input type="number" id="edit-pocet" placeholder="Počet kusů" min="1"><br>
+      Lokalita<select id="edit-lokalita"><br>
+        <option value="">-- Vyber lokaci --</option>
+        <option value="Regál">Regál</option>
+        <option value="U vysekávačky">U vysekávačky</option>
+        <option value="Vysekávačka stojan">Vysekávačka stojan</option>
+        <option value="Laser">Laser</option>
+        <option value="Průjezd">Průjezd</option>
+        
+      </select>
+      
+      Poznámka<input type="text" id="edit-poznamka" placeholder="Poznámka"><br>
+      <br>
+      <button onclick="ulozUpravenyZbytek()">💾 Uložit</button>
+      <button onclick="zrusEditaci()">❌ Zavřít</button>
+    </div>
+  </div>
+
+  <div id="draw-modal" class="modal">
+    <div class="modal-content">
+      <h3>Nakresli zbytek</h3>
+      <canvas id="canvas" width="300" height="300" style="border:1px solid #ccc;"></canvas><br>
+      <button onclick="ulozNakres()">💾 Uložit nákres</button>
+      <button onclick="zavritNakres()">❌ Zavřít</button>
+    </div>
+  </div>
+
+  <div id="modal-pouzit-kusy" class="modal">
+    <div class="modal-content">
+      <h3>Použít kusy</h3>
+      <input type="number" id="pouzit-kusy-pocet" placeholder="Počet kusů k použití" min="1">
+      <button onclick="potvrditPouzitiKusu()">✅ Potvrdit</button>
+      <button onclick="zavritModalPouzit()">❌ Zavřít</button>
+    </div>
+  </div>
+
+
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log("✅ Service worker registrován"))
+        .catch(err => console.error("❌ SW chyba:", err));
+    }
+
+    window.onload = function () {
+      zobrazZbytky();
+      zobrazPoctyNaMape();
+    };
+    
+    function zobrazPoctyNaMape() {
+      const pocty = ziskejPoctyZbytkuPodleLokality();
+    
+      // Mapuj ID nebo title podle tvých zón
+      const mapZona = {
+        "Průjezd": "Průjezd",
+        "Laser": "Laser",
+        "U vysekávačky": "U vysekávačky",
+        "Regál": "Regál"
+      };
+    
+      for (let [lokace, id] of Object.entries(mapZona)) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerText = pocty[lokace] || 0;
+        }
+      }
+    }
+    
+  </script>
+  
+
+  
+
+  <script>
+    // Reload jednou (např. při první návštěvě nebo aktualizaci)
+    if (!sessionStorage.getItem("reloaded")) {
+      sessionStorage.setItem("reloaded", "true");
+  
+      const url = new URL(window.location.href);
+      url.searchParams.set('_nocache', Date.now());
+      window.location.replace(url);
+    }
+  </script>
+  
+  
+
+</body>
+</html>
