@@ -4,7 +4,7 @@
 // ✨ Github zápis
 async function ulozZbytkyNaGitHub(noveData) {
   const token = "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"; // ← Vlož svůj GitHub personal access token sem
-  const username = "krmiro";
+  const username = "Krmiro";
   const repo = "Zbytky";
   const path = "Zbytky/zbytky.json";
 
@@ -49,7 +49,7 @@ let pouzitIndex = null;
 
 
 window.onload = async function () {
-  const url = "https://raw.githubusercontent.com/krmiro/zbytky/main/zbytky.json";
+  const url = "https://raw.githubusercontent.com/KrMiro/Zbytky/main/zbytky.json";
 
   try {
     const res = await fetch(url);
