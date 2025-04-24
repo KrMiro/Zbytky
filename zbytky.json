@@ -1,5 +1,5 @@
 [
-  {
+  
     "delka": 1000,
     "sirka": 500,
     "tloustka": 3,
@@ -10,6 +10,6 @@
     "pocet": 1,
     "datum": "2025-04-24T14:00:00.000Z",
     "pouziteKusy": 0
-  }
+  
 ]
 
