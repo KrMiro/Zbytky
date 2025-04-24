@@ -10,7 +10,8 @@ let pouzitIndex = null;
 
 
 window.onload = async function () {
-  const url = "https://raw.githubusercontent.com/krmiro/zbytky/main/Zbytky/zbytky.json";
+  const url = "https://raw.githubusercontent.com/krmiro/zbytky/main/zbytky.json";
+
 
 
   try {
