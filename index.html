@@ -164,10 +164,7 @@
         .catch(err => console.error("❌ SW chyba:", err));
     }
 
-    window.onload = function () {
-      zobrazZbytky();
-      zobrazPoctyNaMape();
-    };
+    
     
     function zobrazPoctyNaMape() {
       const pocty = ziskejPoctyZbytkuPodleLokality();
