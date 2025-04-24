@@ -1,7 +1,7 @@
 
 // ✨ Github zápis
 async function ulozZbytkyNaGitHub(noveData) {
-  const token = "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"; // ← Vlož svůj GitHub personal access token sem
+  const token = "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"; // ← Vlož svůj GitHub personal access token sem
   const username = "KrMiro";
   const repo = "Zbytky";
   const path = "Zbytky/zbytky.json";
