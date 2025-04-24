@@ -1,4 +1,41 @@
 
+// ✨ Github zápis
+async function ulozZbytkyNaGitHub(noveData) {
+  const token = "TVŮJ_GITHUB_TOKEN_ZDE"; // ← Vlož svůj GitHub personal access token sem
+  const username = "krmiro";
+  const repo = "zbytky";
+  const path = "Zbytky/zbytky.json";
+
+  // 1. Získání SHA poslední verze souboru
+  const shaRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`);
+  const shaData = await shaRes.json();
+  const sha = shaData.sha;
+
+  // 2. Uložení aktualizovaných dat
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: "Aktualizace zbytků přes appku",
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(noveData, null, 2)))),
+      sha: sha
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    console.error("❌ Chyba při ukládání na GitHub:", err);
+  } else {
+    console.log("✅ Data byla zapsána na GitHub.");
+  }
+}
+
+
+// ↓↓↓ Zbytek původního kódu zůstává beze změn ↓↓↓
+
 const form = document.getElementById("zbytek-form");
 const seznam = document.getElementById("seznam-zbytku");
 
@@ -10,29 +47,23 @@ let pouzitIndex = null;
 
 
 window.onload = async function () {
-  const url = "https://raw.githubusercontent.com/krmiro/Zbytky/main/zbytky.json";
-
-
+  const url = "https://raw.githubusercontent.com/krmiro/zbytky/main/Zbytky/zbytky.json";
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    // Ulož do localStorage, pokud chceš (nebo používej rovnou bez toho)
     localStorage.setItem("zbytky", JSON.stringify(data));
-
     zobrazZbytky();
     zobrazPoctyNaMape?.();
   } catch (err) {
     console.error("❌ Nepodařilo se načíst data z GitHubu:", err);
-    zobrazZbytky(); // fallback na localStorage pokud načtení selže
+    zobrazZbytky();
   }
 };
 
-
-form.addEventListener("submit", function (e) {
+form.addEventListener("submit", async function (e) {
   e.preventDefault();
-  
 
   const zbytek = {
     delka: document.getElementById("delka").value,
@@ -44,12 +75,14 @@ form.addEventListener("submit", function (e) {
     pouzite: false,
     pocet: parseInt(document.getElementById("pocet").value),
     datum: new Date().toISOString(),
-    pouziteKusy: 0, // nové pole
+    pouziteKusy: 0
   };
 
   let zbytky = JSON.parse(localStorage.getItem("zbytky")) || [];
   zbytky.push(zbytek);
   localStorage.setItem("zbytky", JSON.stringify(zbytky));
+
+  await ulozZbytkyNaGitHub(zbytky);
 
   form.reset();
   zobrazZbytky();
